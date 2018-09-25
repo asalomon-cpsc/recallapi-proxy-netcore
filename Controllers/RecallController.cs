@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Opendata.Recalls.Commands;
 using Opendata.Recalls.Models;
 using Opendata.Recalls.Repository;
-using Microsoft.Extensions.Logging;
+//using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 
 namespace Opendata.Recalls.Controllers
 {
@@ -16,31 +17,46 @@ namespace Opendata.Recalls.Controllers
     public class RecallController : Controller
     {
         private readonly IRecallApiProxyRepository _recallRepository;
-        private readonly ILogger _logger;
+        //private readonly ILogger _logger; TODO: implement logger
 
-        public RecallController(IRecallApiProxyRepository recallRepository,ILogger logger)
+        public RecallController(IRecallApiProxyRepository recallRepository)//,ILogger logger)
         {
             _recallRepository = recallRepository;
-            _logger = logger;
+            // _logger = logger;
         }
         // GET api/values
-        [HttpGet]
-        public async Task<HttpResponseMessage> Get(HttpRequestMessage req)
-        {
-            var recalls = await _recallRepository.RetrieveRecall(
-               new SearchCommand(){
-                   RecallDateStart=DateTime.Now.AddMonths(-6).ToString("yyyy-MM-dd")
-               }
-            );
-            HttpResponseMessage resp = new HttpResponseMessage(HttpStatusCode.OK);
-            resp.Headers.Add("count",recalls.Count.ToString());
-            return resp;
 
-        }
 
         // POST api/recall
         [HttpPost]
-        public async Task<IEnumerable<Recall>> Post([FromBody]SearchCommand value) => await _recallRepository.RetrieveRecall(value);
+        public async Task<IActionResult> Post([FromBody]SearchCommand value)
+        {
+        
+            if (value == null)
+            {
+                return BadRequest("The supplied request is invalid");
+            }
+           // var searchObject =  Newtonsoft.Json.JsonConvert.DeserializeObject(value);
+            return Ok(await _recallRepository.RetrieveRecall(value));
+        }
+     
+        // GET api/recall
+        [HttpGet]
+        [Route("latest")]
+        public async Task<IActionResult> Latest()
+        {
+
+            return Ok(await _recallRepository.RetrieveLastest());
+        }
+
+        [HttpGet]
+        [Route("children")]
+        public async Task<IActionResult> Children()
+        {
+
+            return Ok(await _recallRepository.RetrieveChildrensRecalls());
+        }
+
 
     }
 }

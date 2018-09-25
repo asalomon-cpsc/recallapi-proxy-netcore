@@ -24,10 +24,21 @@ namespace recallMicroservice
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+             services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin", builder => 
+                    builder.WithOrigins("http://localhost:8082", "http://vmdevdesk13:8082")
+                           .AllowAnyMethod()
+                           .AllowCredentials()
+                           .AllowAnyHeader()
+                           
+                    );
+
+            });
             services.AddMvc();
-            services.AddScoped<IRecallApiProxyRepository,RecallApiProxyRepository>();
-            services.AddScoped<IStatsLogger,StatsLogger>();
-            
+            services.AddScoped<IRecallApiProxyRepository, RecallApiProxyRepository>();
+            services.AddScoped<IStatsLogger, StatsLogger>();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,7 +47,13 @@ namespace recallMicroservice
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                
+
             }
+
+              app.UseCors("AllowSpecificOrigin");
+
+
 
             app.UseMvc();
         }

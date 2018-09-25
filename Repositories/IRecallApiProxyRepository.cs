@@ -6,6 +6,9 @@ namespace Opendata.Recalls.Repository
 {
     public interface IRecallApiProxyRepository
     {
-        Task<List<Recalls.Models.Recall>> RetrieveRecall(SearchCommand command);
+        Task<SearchQueryResult> RetrieveRecall(SearchCommand command);
+        Task<SearchQueryResult> RetrieveLastest(int limit=15);
+
+        Task<SearchQueryResult> RetrieveChildrensRecalls(int limit=15);
     }
 }
